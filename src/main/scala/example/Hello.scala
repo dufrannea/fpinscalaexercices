@@ -124,8 +124,46 @@ object RunPayroll2 {
   }
 
   def main(args: Array[String]): Unit = {
-    import Applicative.Test
+    import Monoid._
+    import Monoid.instances._
+    import Monoid.extensions._
 
-    println(Test.b)
+    val a = Map( 1 -> 4, 3 -> 5)
+    val b = Map( 1 -> 7, 2 -> 5)
+    
+    val myMapSeq = Seq(a,b)
+
+    val intSumMonoid : Monoid[Map[Int,Int]] =
+      mapMergeMonoid[Int,Int](numericsAreMonoids[Int])
+
+    val listMapMonoid = mapMergeMonoid[Int,Seq[Int]](seqIsMonoid)
+    val folded = foldMap(myMapSeq, listMapMonoid)(
+      m => m.map({ case (k,v) => k -> List(v)})
+    )
+
+    val intProductMonoid = 
+      productMonoid(numericsAreMonoids[Int],numericsAreMonoids[Int])
+
+    def parseInt(a : String) : Option[Int] = None
+
+    val parsingFunctions : Seq[String => Option[Int]] = Seq(parseInt _, parseInt _, parseInt _)
+
+    implicit val evidence = functionMonoid[String, Option[Int]](optionMonoid[Int])
+
+    val sumAllInputs : (String => Option[Int])= parsingFunctions.foldM()
+
+    println(sumAllInputs("a"))
+
+    import Monad.Test
+    println(Test.c)
+
+    println(Test.options) 
+    println(Test.options2)
+
+    println(Test.areAllEven(List(1,2,3)))
+    println(Test.areAllEven(List(2,4)))
+    println(Test.replicatedOption)
+
+    println(Test.replicatedList)
   }
 }

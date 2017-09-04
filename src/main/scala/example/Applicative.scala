@@ -6,6 +6,10 @@ import scala.language.higherKinds
 trait Applicative[F[_]] extends Functor[F] {
   def ap[A,B](f : F[A => B])(a : F[A]) : F[B]
   def pure[A](a : A) : F[A]
+
+  def map2[A,B,C](f : A => B => C)(fa : F[A], fb : F[B]) : F[C]= {
+    ap(ap(pure(f))(fa))(fb)
+  }
 }
 
 object Applicative {
